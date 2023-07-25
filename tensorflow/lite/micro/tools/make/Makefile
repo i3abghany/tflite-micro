@@ -48,10 +48,15 @@ TARGET := $(HOST_OS)
 TARGET_ARCH := $(HOST_ARCH)
 
 # Default compiler and tool names:
-TOOLCHAIN:=gcc
-CXX_TOOL := g++
-CC_TOOL := gcc
-AR_TOOL := ar
+# TOOLCHAIN:=gcc
+# CXX_TOOL := g++
+# CC_TOOL := gcc
+# AR_TOOL := ar
+
+TOOLCHAIN:= gcc
+CXX_TOOL := arm-linux-gnueabi-g++
+CC_TOOL := arm-linux-gnueabi-gcc
+AR_TOOL := arm-linux-gnueabi-ar
 
 ifneq ($(TAGS),)
   $(error The TAGS command line option is no longer supported in the TFLM Makefile.)
@@ -179,7 +184,9 @@ ifeq ($(TOOLCHAIN), gcc)
     # that are unsupported with LLVM.
     LDFLAGS += \
       -Wl,--fatal-warnings \
-      -Wl,--gc-sections
+      -Wl,--gc-sections \
+      # -mcpu=cortex-m4 -mthumb
+      # -specs=nano.specs -specs=nosys.specs
   endif
 endif
 

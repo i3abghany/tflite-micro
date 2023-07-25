@@ -63,7 +63,7 @@ def bytes_to_hexstring(buffer):
 
 def generate_array(input_fname):
   """Return array size and array of data from the input file."""
-  if input_fname.endswith('.tflite'):
+  if input_fname.endswith('.tflite') or input_fname.endswith('.bin'):
     with open(input_fname, 'rb') as input_file:
       buffer = input_file.read()
     size = len(buffer)
@@ -113,7 +113,7 @@ def get_array_name(input_fname):
     return [base_array_name + '_test_data', 'int32_t']
   elif input_fname.endswith('_int16.csv'):
     return [base_array_name + '_test_data', 'int16_t']
-  elif input_fname.endswith('_int8.csv'):
+  elif input_fname.endswith('_int8.csv') or input_fname.endswith('.bin'):
     return [base_array_name + '_test_data', 'int8_t']
   elif input_fname.endswith('_float.csv'):
     return [base_array_name + '_test_data', 'float']
@@ -154,6 +154,8 @@ def main():
       elif input_file.endswith('.csv'):
         output_base_fname = output_base_fname + '_test_data'
       elif input_file.endswith('.npy'):
+        output_base_fname = output_base_fname + '_test_data'
+      elif input_file.endswith('.bin'):
         output_base_fname = output_base_fname + '_test_data'
       else:
         raise ValueError(
