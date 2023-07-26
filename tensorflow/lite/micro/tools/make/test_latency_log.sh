@@ -47,7 +47,7 @@ unset ARGS[0]
 # For more info
 # https://stackoverflow.com/questions/4617489/get-values-from-time-command-via-bash-script
 exec 3>&1 4>&2
-time_log=$( { TIMEFORMAT="%R"; time ${TEST_SCRIPT} "${ARGS[@]}" 1>&3 2>&4; } 2>&1 ) # Captures time output only.
+# time_log=$( { TIMEFORMAT="%R"; time ${TEST_SCRIPT} "${ARGS[@]}" 1>&3 2>&4; } 2>&1 ) # Captures time output only.
 exec 3>&- 4>&-
 
-echo "Running ${TEST_FILE_NAME} took ${time_log} seconds"
+# echo "Running ${TEST_FILE_NAME} took ${time_log} seconds"
