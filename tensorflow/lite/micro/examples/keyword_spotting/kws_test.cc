@@ -86,11 +86,6 @@ TF_LITE_MICRO_TEST(TestInvoke) {
     std::cout << "Model provided is schema version not equal to supported version" << std::endl;
   }
 
-  // Pull in only the operation implementations we need.
-  // This relies on a complete list of all the ops needed by this graph.
-  // An easier approach is to just use the AllOpsResolver, but this will
-  // incur some penalty in code space for op implementations that are not
-  // needed by this graph.
   tflite::MicroMutableOpResolver<6> micro_op_resolver;
   micro_op_resolver.AddConv2D(tflite::Register_CONV_2D_INT8());
   micro_op_resolver.AddDepthwiseConv2D(tflite::Register_DEPTHWISE_CONV_2D_INT8());
@@ -128,7 +123,7 @@ TF_LITE_MICRO_TEST(TestInvoke) {
     memcpy(input->data.int8, datum.data, input->bytes);
     TfLiteStatus invoke_status = interpreter.Invoke();
     if (invoke_status != kTfLiteOk) {
-      MicroPrintf("Invoke failed\n");
+      std::cout << "Invoke failed\n";
     }
     TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk, invoke_status);
     TfLiteTensor* output = interpreter.output(0);
@@ -139,48 +134,6 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   }
 
   std::cout << "Testing accuracy: " << ((float) correct / test_data.size()) << std::endl;
-  // Run the model on this input and make sure it succeeds.
-
-  // // Get the output from the model, and make sure it's the expected size and
-  // // type.
-  // TfLiteTensor* output = interpreter.output(0);
-  // TF_LITE_MICRO_EXPECT_EQ(2, output->dims->size);
-  // TF_LITE_MICRO_EXPECT_EQ(1, output->dims->data[0]);
-  // TF_LITE_MICRO_EXPECT_EQ(kCategoryCount, output->dims->data[1]);
-  // TF_LITE_MICRO_EXPECT_EQ(kTfLiteInt8, output->type);
-
-  // // Make sure that the expected "Person" score is higher than the other class.
-  // int8_t person_score = output->data.int8[kPersonIndex];
-  // int8_t no_person_score = output->data.int8[kNotAPersonIndex];
-  // MicroPrintf("person data.  person score: %d, no person score: %d\n",
-  //             person_score, no_person_score);
-  // TF_LITE_MICRO_EXPECT_GT(person_score, no_person_score);
-
-  // memcpy(input->data.int8, g_no_person_image_data, input->bytes);
-
-  // // Run the model on this "No Person" input.
-  // invoke_status = interpreter.Invoke();
-  // if (invoke_status != kTfLiteOk) {
-  //   MicroPrintf("Invoke failed\n");
-  // }
-  // TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk, invoke_status);
-
-  // // Get the output from the model, and make sure it's the expected size and
-  // // type.
-  // output = interpreter.output(0);
-  // TF_LITE_MICRO_EXPECT_EQ(2, output->dims->size);
-  // TF_LITE_MICRO_EXPECT_EQ(1, output->dims->data[0]);
-  // TF_LITE_MICRO_EXPECT_EQ(kCategoryCount, output->dims->data[1]);
-  // TF_LITE_MICRO_EXPECT_EQ(kTfLiteInt8, output->type);
-
-  // // Make sure that the expected "No Person" score is higher.
-  // person_score = output->data.int8[kPersonIndex];
-  // no_person_score = output->data.int8[kNotAPersonIndex];
-  // MicroPrintf("no person data.  person score: %d, no person score: %d\n",
-  //             person_score, no_person_score);
-  // TF_LITE_MICRO_EXPECT_GT(no_person_score, person_score);
-
-  // MicroPrintf("Ran successfully\n");
 }
 
 TF_LITE_MICRO_TESTS_END
