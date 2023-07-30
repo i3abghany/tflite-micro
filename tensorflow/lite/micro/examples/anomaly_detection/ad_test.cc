@@ -14,85 +14,76 @@ limitations under the License.
 ==============================================================================*/
 
 #include "tensorflow/lite/c/common.h"
-#include "tensorflow/lite/micro/examples/keyword_spotting/kws_model_settings.h"
-#include "tensorflow/lite/micro/examples/keyword_spotting/dataset/tst_000595_On_5_test_data.h"
+#include "tensorflow/lite/micro/examples/anomaly_detection/ad_model_settings.h"
+#include "tensorflow/lite/micro/examples/anomaly_detection/ad_model.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_log.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
-#include "tensorflow/lite/micro/examples/keyword_spotting/kws_data.h"
-#include "tensorflow/lite/micro/examples/keyword_spotting/detection_responder.h"
+#include "tensorflow/lite/micro/examples/anomaly_detection/detection_responder.h"
+#include "tensorflow/lite/micro/examples/anomaly_detection/util/quantization_helpers.h"
 #include "tensorflow/lite/micro/testing/micro_test.h"
 #include "tensorflow/lite/schema/schema_generated.h"
-#include "tensorflow/lite/micro/examples/keyword_spotting/dataset.h"
+#include "tensorflow/lite/micro/examples/anomaly_detection/dataset.h"
 #include <iostream>
 #include <fstream>
 
 struct TestSample
 {
   std::string name;
-  const int8_t *data;
+  const float *data;
   size_t size;
 };
 
-TestSample GetTestSample(const char *dataset_path, const char* filename)
+std::vector<TestSample> GetTestSample(const char *dataset_path, const char* filename)
 {
     std::ifstream in(std::string(dataset_path) + "/" + std::string(filename), std::ifstream::ate | std::ifstream::binary);
     size_t size = in.tellg();
     in.seekg(0);
-    char *data = new char[size];
-    in.read(data, size);
-    return { filename, (int8_t *) data, size };
+    assert(size % 4 == 0);
+    size /= 4;
+    const int INPUT_SAMPLE_SIZE = 640;
+    float **data = new float*[size / INPUT_SAMPLE_SIZE];
+    std::vector<TestSample> ret;
+    float tmp;
+    for (int i = 0; i < (int)(size / INPUT_SAMPLE_SIZE); i++) {
+      data[i] = new float[INPUT_SAMPLE_SIZE];
+      for (int j = 0; j < INPUT_SAMPLE_SIZE; j++) {
+        in.read(reinterpret_cast<char*>(&tmp), sizeof(float));
+        data[i][j] = tmp;
+      }
+      ret.push_back({ std::to_string(i), data[i], INPUT_SAMPLE_SIZE });
+    }
+    return ret;
 }
 
 std::vector<TestSample> load_test_data()
 {
-  const char *dataset_path = "/localhome/mam47/libs/tflite-micro/tensorflow/lite/micro/examples/keyword_spotting/dataset";
-  std::vector<TestSample> ret;
-
-#if 0
-  DIR *dir = opendir(dataset_path);
-  struct dirent *ent = readdir(dir);
-  while (ent != NULL)
-  {
-    if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
-    {
-      ent = readdir(dir);
-      continue;
-    }
-    ret.push_back(GetTestSample(dataset_path, ent->d_name));
-    ent = readdir(dir);
-  }
-#else
+  const char *dataset_path = "/localhome/mam47/research/microscale/tflite-micro/tensorflow/lite/micro/examples/anomaly_detection/dataset";
   for (const char *name : test_sample_file_paths)
   {
     if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
       continue;
-    ret.push_back(GetTestSample(dataset_path, name));
+    return GetTestSample(dataset_path, name);
   }
-#endif
-  return ret;
+  assert(false);
 }
 
 constexpr int tensor_arena_size = 200 * 1024;
 uint8_t tensor_arena[tensor_arena_size];
 
 TF_LITE_MICRO_TESTS_BEGIN
-extern int8_t g_kws_ref_model_model_data[];
 TF_LITE_MICRO_TEST(TestInvoke) {
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
-  const tflite::Model* model = ::tflite::GetModel(g_kws_ref_model_model_data);
+  const tflite::Model* model = ::tflite::GetModel(g_model);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     std::cout << "Model provided is schema version not equal to supported version" << std::endl;
   }
 
-  tflite::MicroMutableOpResolver<6> micro_op_resolver;
-  micro_op_resolver.AddConv2D(tflite::Register_CONV_2D_INT8());
-  micro_op_resolver.AddDepthwiseConv2D(tflite::Register_DEPTHWISE_CONV_2D_INT8());
-  micro_op_resolver.AddAveragePool2D(tflite::Register_AVERAGE_POOL_2D_INT8());
-  micro_op_resolver.AddReshape();
-  micro_op_resolver.AddFullyConnected(tflite::Register_FULLY_CONNECTED_INT8());
-  micro_op_resolver.AddSoftmax(tflite::Register_SOFTMAX_INT8());
+  tflite::MicroMutableOpResolver<3> micro_op_resolver;
+  micro_op_resolver.AddFullyConnected();
+  micro_op_resolver.AddQuantize();
+  micro_op_resolver.AddDequantize();
 
   // Build an interpreter to run the model with.
   tflite::MicroInterpreter interpreter(model, micro_op_resolver, tensor_arena,
@@ -102,37 +93,38 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   // Get information about the memory area to use for the model's input.
   TfLiteTensor* input = interpreter.input(0);
 
-  // Make sure the input has the properties we expect.
-  // TF_LITE_MICRO_EXPECT(input != nullptr);
-  // TF_LITE_MICRO_EXPECT_EQ(4, input->dims->size);
-  // TF_LITE_MICRO_EXPECT_EQ(1, input->dims->data[0]);
-  // TF_LITE_MICRO_EXPECT_EQ(kNumRows, input->dims->data[1]);
-  // TF_LITE_MICRO_EXPECT_EQ(kNumCols, input->dims->data[2]);
-  // TF_LITE_MICRO_EXPECT_EQ(kNumChannels, input->dims->data[3]);
-  // TF_LITE_MICRO_EXPECT_EQ(kTfLiteInt8, input->type);
-
   // Copy an image with a person into the memory area used for the input.
   auto test_data = load_test_data();
-  int correct = 0;
+  float input_scale = input->params.scale;
+  int input_zero_point = input->params.zero_point;
   int i = 0;
   for (auto &datum : test_data)
   {
-    std::cout << "Starting inference: " << i << '/' << test_data.size() << std::endl;
+    std::cout << "Starting inference: " << i << std::endl;
+    i++;
+    int8_t *quant_input = new int8_t[datum.size];
+    for (size_t k = 0; k < datum.size; k++) {
+      quant_input[k] = QuantizeFloatToInt8(datum.data[k], input_scale, input_zero_point);
+    }
     TFLITE_DCHECK_EQ(input->bytes, static_cast<size_t>(datum.size));
-    memcpy(input->data.int8, datum.data, input->bytes);
+    memcpy(input->data.int8, quant_input, input->bytes);
     TfLiteStatus invoke_status = interpreter.Invoke();
     if (invoke_status != kTfLiteOk) {
       std::cout << "Invoke failed\n";
     }
     TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk, invoke_status);
     TfLiteTensor* output = interpreter.output(0);
-    bool is_correct = RespondToDetection(output->data.int8, datum.name.c_str());
-    correct += is_correct == true;
-    std::cout << i << "/" << test_data.size() << ": predicted correctly: " << (is_correct ? "true" : "false") << std::endl;
-    i++;
-  }
+    float diffsum = 0;
 
-  std::cout << "Testing accuracy: " << ((float) correct / test_data.size()) << std::endl;
+    for (size_t t = 0; t < kFeatureElementCount; t++) {
+      float converted = DequantizeInt8ToFloat(output->data.int8[t], interpreter.output(0)->params.scale,
+                                              interpreter.output(0)->params.zero_point);
+      float diff = converted - datum.data[t];
+      diffsum += diff * diff;
+    }
+    diffsum /= kFeatureElementCount;
+    std::cout << "diffsum: " << diffsum << std::endl;
+  }
 }
 
 TF_LITE_MICRO_TESTS_END

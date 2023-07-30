@@ -114,7 +114,7 @@ def get_array_name(input_fname):
   elif input_fname.endswith('_int16.csv'):
     return [base_array_name + '_test_data', 'int16_t']
   elif input_fname.endswith('_int8.csv') or input_fname.endswith('.bin'):
-    return [base_array_name + '_test_data', 'int8_t']
+    return [base_array_name + '_test_data', 'uint8_t']
   elif input_fname.endswith('_float.csv'):
     return [base_array_name + '_test_data', 'float']
   elif input_fname.endswith('npy'):
