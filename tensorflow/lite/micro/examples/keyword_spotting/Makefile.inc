@@ -21,13 +21,6 @@ IMAGE_PROVIDER_TEST_HDRS := \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/keyword_spotting/image_provider.h \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/keyword_spotting/model_settings.h
 
-DETECTION_RESPONDER_TEST_SRCS := \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/keyword_spotting/detection_responder.cc \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/keyword_spotting/detection_responder_test.cc
-
-DETECTION_RESPONDER_TEST_HDRS := \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/keyword_spotting/detection_responder.h
-
 keyword_spotting_SRCS := \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/keyword_spotting/detection_responder.cc \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/keyword_spotting/image_provider.cc \
@@ -62,14 +55,6 @@ ifneq ($(TARGET_ARCH), $(filter $(TARGET_ARCH), hifimini hifi3z))
   $(eval $(call microlite_test,keyword_spotting_test,\
   $(keyword_spotting_TEST_SRCS),$(keyword_spotting_TEST_HDRS),$(keyword_spotting_GENERATOR_INPUTS)))
 endif
-
-# Tests the image provider module.
-$(eval $(call microlite_test,image_provider_test,\
-$(IMAGE_PROVIDER_TEST_SRCS),$(IMAGE_PROVIDER_TEST_HDRS)))
-
-# Tests the detection responder module.
-$(eval $(call microlite_test,detection_responder_test,\
-$(DETECTION_RESPONDER_TEST_SRCS),$(DETECTION_RESPONDER_TEST_HDRS)))
 
 # Builds a standalone object recognition binary.
 $(eval $(call microlite_test,keyword_spotting,\

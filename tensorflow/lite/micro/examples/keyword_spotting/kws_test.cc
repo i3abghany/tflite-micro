@@ -79,8 +79,6 @@ uint8_t tensor_arena[tensor_arena_size];
 TF_LITE_MICRO_TESTS_BEGIN
 extern int8_t g_kws_ref_model_model_data[];
 TF_LITE_MICRO_TEST(TestInvoke) {
-  // Map the model into a usable data structure. This doesn't involve any
-  // copying or parsing, it's a very lightweight operation.
   const tflite::Model* model = ::tflite::GetModel(g_kws_ref_model_model_data);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     std::cout << "Model provided is schema version not equal to supported version" << std::endl;
@@ -94,37 +92,26 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   micro_op_resolver.AddFullyConnected(tflite::Register_FULLY_CONNECTED_INT8());
   micro_op_resolver.AddSoftmax(tflite::Register_SOFTMAX_INT8());
 
-  // Build an interpreter to run the model with.
-  tflite::MicroInterpreter interpreter(model, micro_op_resolver, tensor_arena,
-                                       tensor_arena_size);
+  tflite::MicroInterpreter interpreter(model, micro_op_resolver, tensor_arena, tensor_arena_size);
   interpreter.AllocateTensors();
-
-  // Get information about the memory area to use for the model's input.
   TfLiteTensor* input = interpreter.input(0);
 
-  // Make sure the input has the properties we expect.
-  // TF_LITE_MICRO_EXPECT(input != nullptr);
-  // TF_LITE_MICRO_EXPECT_EQ(4, input->dims->size);
-  // TF_LITE_MICRO_EXPECT_EQ(1, input->dims->data[0]);
-  // TF_LITE_MICRO_EXPECT_EQ(kNumRows, input->dims->data[1]);
-  // TF_LITE_MICRO_EXPECT_EQ(kNumCols, input->dims->data[2]);
-  // TF_LITE_MICRO_EXPECT_EQ(kNumChannels, input->dims->data[3]);
-  // TF_LITE_MICRO_EXPECT_EQ(kTfLiteInt8, input->type);
-
-  // Copy an image with a person into the memory area used for the input.
   auto test_data = load_test_data();
   int correct = 0;
   int i = 0;
+
   for (auto &datum : test_data)
   {
     std::cout << "Starting inference: " << i << '/' << test_data.size() << std::endl;
     TFLITE_DCHECK_EQ(input->bytes, static_cast<size_t>(datum.size));
     memcpy(input->data.int8, datum.data, input->bytes);
     TfLiteStatus invoke_status = interpreter.Invoke();
+
     if (invoke_status != kTfLiteOk) {
       std::cout << "Invoke failed\n";
     }
     TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk, invoke_status);
+
     TfLiteTensor* output = interpreter.output(0);
     bool is_correct = RespondToDetection(output->data.int8, datum.name.c_str());
     correct += is_correct == true;
