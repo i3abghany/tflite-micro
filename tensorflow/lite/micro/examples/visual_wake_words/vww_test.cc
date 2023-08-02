@@ -16,7 +16,6 @@ limitations under the License.
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/micro/examples/visual_wake_words/vww_model_settings.h"
 #include "tensorflow/lite/micro/examples/visual_wake_words/vww_model_data.h"
-#include "tensorflow/lite/micro/examples/visual_wake_words/util/quantization_helpers.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_log.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
@@ -48,7 +47,7 @@ TestSample GetTestSample(const char *dataset_path, const char* filename)
 
 std::vector<TestSample> load_test_data()
 {
-  const char *dataset_path = "REV_PARSE_PATH_PLACEHOLDER/tflite-micro/tensorflow/lite/micro/examples/visual_wake_words/dataset";
+  const char *dataset_path = "/local-scratch/localhome/mam47/research/microscale/tflite-micro/tensorflow/lite/micro/examples/visual_wake_words/dataset";
   std::vector<TestSample> ret;
   for (const char *name : test_sample_file_paths)
   {
@@ -76,8 +75,7 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   micro_op_resolver.AddSoftmax(tflite::Register_SOFTMAX_INT8());
   micro_op_resolver.AddFullyConnected(tflite::Register_FULLY_CONNECTED_INT8());
 
-  tflite::MicroInterpreter interpreter(model, micro_op_resolver, tensor_arena,
-                                       tensor_arena_size);
+  tflite::MicroInterpreter interpreter(model, micro_op_resolver, tensor_arena, tensor_arena_size);
   interpreter.AllocateTensors();
   TfLiteTensor* input = interpreter.input(0);
   auto test_data = load_test_data();
@@ -85,23 +83,24 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   for (auto &datum : test_data)
   {
     std::cout << "Starting inference: " << i << std::endl;
-    i++;
     TFLITE_DCHECK_EQ(input->bytes, static_cast<size_t>(datum.size));
     memcpy(input->data.int8, datum.data, input->bytes);
     TfLiteStatus invoke_status = interpreter.Invoke();
+
     if (invoke_status != kTfLiteOk) {
       std::cout << "Invoke failed\n";
     }
     TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk, invoke_status);
-    TfLiteTensor* output = interpreter.output(0);
 
+    TfLiteTensor* output = interpreter.output(0);
     int non_person_score = output->data.int8[0];
     int is_person_score = output->data.int8[1];
 
     bool predicted_person = is_person_score > non_person_score;
-
     bool is_correct = RespondToDetection(predicted_person, datum.name.c_str());
+
     std::cout << "is_correct: " << is_correct << std::endl;
+    i++;
   }
 }
 

@@ -12,33 +12,13 @@ $(visual_wake_words_MODEL_SRCS)
 visual_wake_words_TEST_HDRS := \
 $(visual_wake_words_MODEL_HDRS)
 
-IMAGE_PROVIDER_TEST_SRCS := \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/visual_wake_words/image_provider.cc \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/visual_wake_words/image_provider_test.cc \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/visual_wake_words/vww_model_settings.cc
-
-IMAGE_PROVIDER_TEST_HDRS := \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/visual_wake_words/image_provider.h \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/visual_wake_words/model_settings.h
-
-DETECTION_RESPONDER_TEST_SRCS := \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/visual_wake_words/detection_responder.cc \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/visual_wake_words/detection_responder_test.cc
-
-DETECTION_RESPONDER_TEST_HDRS := \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/visual_wake_words/detection_responder.h
-
 visual_wake_words_SRCS := \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/visual_wake_words/detection_responder.cc \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/visual_wake_words/image_provider.cc \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/visual_wake_words/main.cc \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/visual_wake_words/main_functions.cc \
 $(visual_wake_words_MODEL_SRCS)
 
 visual_wake_words_HDRS := \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/visual_wake_words/detection_responder.h \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/visual_wake_words/image_provider.h \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/visual_wake_words/main_functions.h \
 $(visual_wake_words_MODEL_HDRS)
 
 visual_wake_words_GENERATOR_INPUTS := \
@@ -63,15 +43,7 @@ ifneq ($(TARGET_ARCH), $(filter $(TARGET_ARCH), hifimini hifi3z))
   $(visual_wake_words_TEST_SRCS),$(visual_wake_words_TEST_HDRS),$(visual_wake_words_GENERATOR_INPUTS)))
 endif
 
-# Tests the image provider module.
-$(eval $(call microlite_test,image_provider_test,\
-$(IMAGE_PROVIDER_TEST_SRCS),$(IMAGE_PROVIDER_TEST_HDRS)))
-
-# Tests the detection responder module.
-$(eval $(call microlite_test,detection_responder_test,\
-$(DETECTION_RESPONDER_TEST_SRCS),$(DETECTION_RESPONDER_TEST_HDRS)))
-
-# Builds a standalone object recognition binary.
+# Builds a standalone binary.
 $(eval $(call microlite_test,visual_wake_words,\
 $(visual_wake_words_SRCS),$(visual_wake_words_HDRS),$(visual_wake_words_GENERATOR_INPUTS)))
 
