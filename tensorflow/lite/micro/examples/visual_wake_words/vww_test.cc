@@ -48,7 +48,7 @@ TestSample GetTestSample(const char *dataset_path, const char* filename)
 
 std::vector<TestSample> load_test_data()
 {
-  const char *dataset_path = "/localhome/mam47/research/microscale/tflite-micro/tensorflow/lite/micro/examples/visual_wake_words/dataset";
+  const char *dataset_path = "REV_PARSE_PATH_PLACEHOLDER/tflite-micro/tensorflow/lite/micro/examples/visual_wake_words/dataset";
   std::vector<TestSample> ret;
   for (const char *name : test_sample_file_paths)
   {

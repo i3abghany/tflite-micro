@@ -58,7 +58,7 @@ std::vector<TestSample> GetTestSample(const char *dataset_path, const char* file
 
 std::vector<TestSample> load_test_data()
 {
-  const char *dataset_path = "/localhome/mam47/research/microscale/tflite-micro/tensorflow/lite/micro/examples/anomaly_detection/dataset";
+  const char *dataset_path = "REV_PARSE_PATH_PLACEHOLDER/tflite-micro/tensorflow/lite/micro/examples/anomaly_detection/dataset";
   for (const char *name : test_sample_file_paths)
   {
     if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
