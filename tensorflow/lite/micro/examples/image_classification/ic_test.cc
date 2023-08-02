@@ -16,7 +16,6 @@ limitations under the License.
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/micro/examples/image_classification/ic_model_settings.h"
 #include "tensorflow/lite/micro/examples/image_classification/ic_model_data.h"
-#include "tensorflow/lite/micro/examples/image_classification/util/quantization_helpers.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_log.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
@@ -48,7 +47,7 @@ TestSample GetTestSample(const char *dataset_path, const char* filename)
 
 std::vector<TestSample> load_test_data()
 {
-  const char *dataset_path = "REV_PARSE_PATH_PLACEHOLDER/tflite-micro/tensorflow/lite/micro/examples/image_classification/dataset";
+  const char *dataset_path = "/local-scratch/localhome/mam47/research/microscale/tflite-micro/tensorflow/lite/micro/examples/image_classification/dataset";
   std::vector<TestSample> ret;
   for (const char *name : test_sample_file_paths)
   {

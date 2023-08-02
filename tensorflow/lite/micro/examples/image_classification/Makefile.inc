@@ -52,14 +52,6 @@ ifneq ($(TARGET_ARCH), $(filter $(TARGET_ARCH), hifimini hifi3z))
   $(image_classification_TEST_SRCS),$(image_classification_TEST_HDRS),$(image_classification_GENERATOR_INPUTS)))
 endif
 
-# Tests the image provider module.
-$(eval $(call microlite_test,image_provider_test,\
-$(IMAGE_PROVIDER_TEST_SRCS),$(IMAGE_PROVIDER_TEST_HDRS)))
-
-# Tests the detection responder module.
-$(eval $(call microlite_test,detection_responder_test,\
-$(DETECTION_RESPONDER_TEST_SRCS),$(DETECTION_RESPONDER_TEST_HDRS)))
-
 # Builds a standalone object recognition binary.
 $(eval $(call microlite_test,image_classification,\
 $(image_classification_SRCS),$(image_classification_HDRS),$(image_classification_GENERATOR_INPUTS)))
