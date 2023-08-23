@@ -34,42 +34,27 @@ struct TestSample
   size_t size;
 };
 
-std::vector<TestSample> GetTestSample(const char *dataset_path, const char* filename)
+TestSample GetTestSample(const char *dataset_path, const char* filename, int idx)
 {
     std::ifstream in(std::string(dataset_path) + "/" + std::string(filename), std::ifstream::ate | std::ifstream::binary);
     size_t size = in.tellg();
-    in.seekg(0);
     assert(size % 4 == 0);
     size /= 4;
     const int INPUT_SAMPLE_SIZE = 640;
-    float **data = new float*[size / INPUT_SAMPLE_SIZE];
-    std::vector<TestSample> ret;
+    int seek = INPUT_SAMPLE_SIZE * idx * sizeof(float);
+    in.seekg(seek);
+    float *data = new float[INPUT_SAMPLE_SIZE];
     float tmp;
-    for (int i = 0; i < (int)(size / INPUT_SAMPLE_SIZE); i++) {
-      data[i] = new float[INPUT_SAMPLE_SIZE];
-      for (int j = 0; j < INPUT_SAMPLE_SIZE; j++) {
-        in.read(reinterpret_cast<char*>(&tmp), sizeof(float));
-        data[i][j] = tmp;
-      }
-      ret.push_back({ std::to_string(i), data[i], INPUT_SAMPLE_SIZE });
+    for (int j = 0; j < INPUT_SAMPLE_SIZE; j++) {
+      in.read(reinterpret_cast<char*>(&tmp), sizeof(float));
+      data[j] = tmp;
     }
-    return ret;
-}
-
-std::vector<TestSample> load_test_data()
-{
-  const char *dataset_path = "/local-scratch/localhome/mam47/research/microscale/tflite-micro/tensorflow/lite/micro/examples/anomaly_detection/dataset";
-  for (const char *name : test_sample_file_paths)
-  {
-    if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
-      continue;
-    return GetTestSample(dataset_path, name);
-  }
-  assert(false);
+    return { std::to_string(idx), data, INPUT_SAMPLE_SIZE };
 }
 
 constexpr int tensor_arena_size = 200 * 1024;
 uint8_t tensor_arena[tensor_arena_size];
+const char *dataset_path = "/local-scratch/localhome/mam47/research/microscale/tflite-micro/tensorflow/lite/micro/examples/anomaly_detection/dataset";
 
 TF_LITE_MICRO_TESTS_BEGIN
 TF_LITE_MICRO_TEST(TestInvoke) {
@@ -94,36 +79,41 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   TfLiteTensor* input = interpreter.input(0);
 
   // Copy an image with a person into the memory area used for the input.
-  auto test_data = load_test_data();
+  // auto test_data = load_test_data();
   float input_scale = input->params.scale;
   int input_zero_point = input->params.zero_point;
   int i = 0;
-  for (auto &datum : test_data)
+  for (const char *name : test_sample_file_paths)
   {
-    std::cout << "Starting inference: " << i << std::endl;
-    i++;
-    int8_t *quant_input = new int8_t[datum.size];
-    for (size_t k = 0; k < datum.size; k++) {
-      quant_input[k] = QuantizeFloatToInt8(datum.data[k], input_scale, input_zero_point);
-    }
-    TFLITE_DCHECK_EQ(input->bytes, static_cast<size_t>(datum.size));
-    memcpy(input->data.int8, quant_input, input->bytes);
-    TfLiteStatus invoke_status = interpreter.Invoke();
-    if (invoke_status != kTfLiteOk) {
-      std::cout << "Invoke failed\n";
-    }
-    TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk, invoke_status);
-    TfLiteTensor* output = interpreter.output(0);
-    float diffsum = 0;
+    if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
+      continue;
+    for (int j = 0; j < 40; j++) {
+      auto datum = GetTestSample(dataset_path, name, j);
+      std::cout << "Starting inference: " << i << " (AD)" << std::endl;
+      i++;
+      int8_t *quant_input = new int8_t[datum.size];
+      for (size_t k = 0; k < datum.size; k++) {
+        quant_input[k] = QuantizeFloatToInt8(datum.data[k], input_scale, input_zero_point);
+      }
+      TFLITE_DCHECK_EQ(input->bytes, static_cast<size_t>(datum.size));
+      memcpy(input->data.int8, quant_input, input->bytes);
+      TfLiteStatus invoke_status = interpreter.Invoke();
+      if (invoke_status != kTfLiteOk) {
+        std::cout << "Invoke failed\n";
+      }
+      TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk, invoke_status);
+      TfLiteTensor* output = interpreter.output(0);
+      float diffsum = 0;
 
-    for (size_t t = 0; t < kFeatureElementCount; t++) {
-      float converted = DequantizeInt8ToFloat(output->data.int8[t], interpreter.output(0)->params.scale,
-                                              interpreter.output(0)->params.zero_point);
-      float diff = converted - datum.data[t];
-      diffsum += diff * diff;
+      for (size_t t = 0; t < kFeatureElementCount; t++) {
+        float converted = DequantizeInt8ToFloat(output->data.int8[t], interpreter.output(0)->params.scale,
+                                                interpreter.output(0)->params.zero_point);
+        float diff = converted - datum.data[t];
+        diffsum += diff * diff;
+      }
+      diffsum /= kFeatureElementCount;
+      std::cout << "diffsum: " << diffsum << std::endl;
     }
-    diffsum /= kFeatureElementCount;
-    std::cout << "diffsum: " << diffsum << std::endl;
   }
 }
 
