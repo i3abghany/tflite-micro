@@ -68,7 +68,6 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   interpreter.AllocateTensors();
   TfLiteTensor* input = interpreter.input(0);
 
-  auto test_data = load_test_data();
   int correct = 0;
   int i = 0;
 
@@ -90,7 +89,7 @@ TF_LITE_MICRO_TEST(TestInvoke) {
     TfLiteTensor* output = interpreter.output(0);
     bool is_correct = RespondToDetection(output->data.int8, datum.name.c_str());
     correct += is_correct == true;
-    std::cout << i << "/" << test_data.size() << ": predicted correctly: " << (is_correct ? "true" : "false") << std::endl;
+    std::cout << "predicted correctly: " << (is_correct ? "true" : "false") << std::endl;
     i++;
   }
 
