@@ -46,7 +46,7 @@ TestSample GetTestSample(const char *dataset_path, const char* filename)
 
 constexpr int tensor_arena_size = 200 * 1024;
 uint8_t tensor_arena[tensor_arena_size];
-const char *dataset_path = "REV_PARSE_PATH_PLACEHOLDER/microscale/tflite-micro/tensorflow/lite/micro/examples/keyword_spotting/dataset";
+const char *dataset_path = "REV_PARSE_PATH_PLACEHOLDER/tflite-micro/tensorflow/lite/micro/examples/keyword_spotting/dataset";
 
 TF_LITE_MICRO_TESTS_BEGIN
 extern int8_t g_kws_ref_model_model_data[];
