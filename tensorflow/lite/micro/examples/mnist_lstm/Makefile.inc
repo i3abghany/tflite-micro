@@ -31,9 +31,9 @@ $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/mnist_lstm/image_provider.h \
 $(mnist_lstm_MODEL_HDRS)
 
 mnist_lstm_GENERATOR_INPUTS := \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/models/lstm_model.tflite \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/mnist_lstm/dataset/*.bin \
-# mnist_lstm_GENERATOR_INPUTS := $(wildcard $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/mnist_lstm/dataset/*.bin)
+$(TENSORFLOW_ROOT)tensorflow/lite/micro/models/lstm_model.tflite
+# $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/mnist_lstm/dataset/*.bin \
+# mnist_lstm_GENERATOR_INPUTS := $(wildcard $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/mnist_lenet/dataset/*.bin)
 
 mnist_lstm_GENERATED_SRCS := \
 $(GENERATED_SRCS_DIR)$(TENSORFLOW_ROOT)tensorflow/lite/micro/models/lstm_model.cc

@@ -42,25 +42,12 @@ TestSample GetTestSample(const char *dataset_path, const char* filename)
     in.seekg(0);
     char *data = new char[size];
     in.read(data, size);
-    std::cout << filename << ' ' << size << std::endl;
     return TestSample{ std::string(filename), (int8_t *) data, size };
-}
-
-std::vector<TestSample> load_test_data()
-{
-  const char *dataset_path = "REV_PARSE_PATH_PLACEHOLDER/tflite-micro/tensorflow/lite/micro/examples/mnist_lstm/dataset";
-  std::vector<TestSample> ret;
-  for (const char *name : test_sample_file_paths)
-  {
-    if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
-      continue;
-    ret.push_back(GetTestSample(dataset_path, name));
-  }
-  return ret;
 }
 
 constexpr int tensor_arena_size = 100 * 1024;
 uint8_t tensor_arena[tensor_arena_size];
+const char *dataset_path = "/local-scratch/localhome/mam47/research/microscale/tflite-micro/tensorflow/lite/micro/examples/mnist_lenet/dataset";
 
 TF_LITE_MICRO_TESTS_BEGIN
 TF_LITE_MICRO_TEST(TestInvoke) {
@@ -68,12 +55,9 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     std::cout << "Model provided is schema version not equal to supported version" << std::endl;
   }
-  tflite::MicroMutableOpResolver<8> micro_op_resolver;
+  tflite::MicroMutableOpResolver<5> micro_op_resolver;
   micro_op_resolver.AddFullyConnected(tflite::Register_FULLY_CONNECTED_INT8());
   micro_op_resolver.AddAveragePool2D(tflite::Register_AVERAGE_POOL_2D_INT8());
-  micro_op_resolver.AddDepthwiseConv2D(tflite::Register_DEPTHWISE_CONV_2D_INT8());
-  micro_op_resolver.AddAdd(tflite::Register_ADD_INT8());
-  micro_op_resolver.AddConv2D(tflite::Register_CONV_2D_INT8());
   micro_op_resolver.AddReshape();
   micro_op_resolver.AddSoftmax(tflite::Register_SOFTMAX_INT8());
   micro_op_resolver.AddUnidirectionalSequenceLSTM();
@@ -83,12 +67,15 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   interpreter.AllocateTensors();
   TfLiteTensor* input = interpreter.input(0);
   TF_LITE_MICRO_EXPECT(input != nullptr);
-  auto test_data = load_test_data();
+  // auto test_data = load_test_data();
   int i = 0;
   int correct = 0;
-  for (auto &datum : test_data)
+  for (const char *name : test_sample_file_paths)
   {
-    std::cout << "Starting inference: " << i << std::endl;
+    if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
+      continue;
+    auto datum = GetTestSample(dataset_path, name);
+    std::cout << "Starting inference: " << i << " (LSTM)" << std::endl;
     i++;
     TFLITE_DCHECK_EQ(input->bytes, static_cast<size_t>(datum.size));
     for (size_t x = 0; x < input->bytes; x++) {
