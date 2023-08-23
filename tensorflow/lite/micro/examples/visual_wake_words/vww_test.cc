@@ -64,6 +64,7 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   micro_op_resolver.AddFullyConnected(tflite::Register_FULLY_CONNECTED_INT8());
 
   tflite::MicroInterpreter interpreter(model, micro_op_resolver, tensor_arena, tensor_arena_size);
+  interpreter.AllocateTensors();
   int i = 0;
   for (const char *name : test_sample_file_paths)
   {
@@ -71,7 +72,6 @@ TF_LITE_MICRO_TEST(TestInvoke) {
       continue;
     auto datum = GetTestSample(dataset_path, name);
     std::cout << "Starting inference: " << i << " (VWW)" << std::endl;
-    interpreter.AllocateTensors();
     TfLiteTensor* input = interpreter.input(0);
     TFLITE_DCHECK_EQ(input->bytes, static_cast<size_t>(datum.size));
     memcpy(input->data.int8, datum.data, input->bytes);

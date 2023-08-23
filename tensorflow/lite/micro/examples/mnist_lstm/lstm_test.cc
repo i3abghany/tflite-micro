@@ -92,6 +92,7 @@ TF_LITE_MICRO_TEST(TestInvoke) {
     bool is_correct = RespondToDetection(output->data.int8, datum.name.c_str());
     correct += is_correct == true;
     std::cout << "is_correct: " << is_correct << std::endl;
+    interpreter.Reset();
   }
 }
 

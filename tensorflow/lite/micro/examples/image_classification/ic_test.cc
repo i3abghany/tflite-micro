@@ -47,7 +47,7 @@ TestSample GetTestSample(const char *dataset_path, const char* filename)
 
 constexpr int tensor_arena_size = 100 * 1024;
 uint8_t tensor_arena[tensor_arena_size];
-const char *dataset_path = "REV_PARSE_PATH_PLACEHOLDER/tflite-micro/tensorflow/lite/micro/examples/image_classification/dataset";
+const char *dataset_path = "/local-scratch/localhome/mam47/research/microscale/tflite-micro/tensorflow/lite/micro/examples/image_classification/dataset";
 
 TF_LITE_MICRO_TESTS_BEGIN
 TF_LITE_MICRO_TEST(TestInvoke) {
@@ -65,6 +65,7 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   micro_op_resolver.AddSoftmax(tflite::Register_SOFTMAX_INT8());
 
   tflite::MicroInterpreter interpreter(model, micro_op_resolver, tensor_arena, tensor_arena_size);
+  interpreter.AllocateTensors();
   int i = 0;
   for (const char *name : test_sample_file_paths)
   {
@@ -73,7 +74,6 @@ TF_LITE_MICRO_TEST(TestInvoke) {
     auto datum = GetTestSample(dataset_path, name);
     std::cout << "Starting inference: " << i << " (IC)" << std::endl;
     i++;
-    interpreter.AllocateTensors();
     TfLiteTensor* input = interpreter.input(0);
     TFLITE_DCHECK_EQ(input->bytes, static_cast<size_t>(datum.size));
     for (size_t k = 0; k < datum.size; k++) {
@@ -89,7 +89,6 @@ TF_LITE_MICRO_TEST(TestInvoke) {
 
     bool is_correct = RespondToDetection(output->data.int8, datum.name.c_str());
     std::cout << "is_correct: " << is_correct << std::endl;
-    interpreter.Reset();
   }
 }
 

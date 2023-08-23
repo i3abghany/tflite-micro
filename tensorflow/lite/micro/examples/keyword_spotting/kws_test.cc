@@ -92,8 +92,6 @@ TF_LITE_MICRO_TEST(TestInvoke) {
     std::cout << "predicted correctly: " << (is_correct ? "true" : "false") << std::endl;
     i++;
   }
-
-  // std::cout << "Testing accuracy: " << ((float) correct / test_data.size()) << std::endl;
 }
 
 TF_LITE_MICRO_TESTS_END
