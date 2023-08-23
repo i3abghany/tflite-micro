@@ -45,21 +45,9 @@ TestSample GetTestSample(const char *dataset_path, const char* filename)
     return TestSample{ std::string(filename), (int8_t *) data, size };
 }
 
-std::vector<TestSample> load_test_data()
-{
-  const char *dataset_path = "/local-scratch/localhome/mam47/research/microscale/tflite-micro/tensorflow/lite/micro/examples/visual_wake_words/dataset";
-  std::vector<TestSample> ret;
-  for (const char *name : test_sample_file_paths)
-  {
-    if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
-      continue;
-    ret.push_back(GetTestSample(dataset_path, name));
-  }
-  return ret;
-}
-
 constexpr int tensor_arena_size = 300 * 1024;
 uint8_t tensor_arena[tensor_arena_size];
+const char *dataset_path = "REV_PARSE_PATH_PLACEHOLDER/tflite-micro/tensorflow/lite/micro/examples/visual_wake_words/dataset";
 
 TF_LITE_MICRO_TESTS_BEGIN
 TF_LITE_MICRO_TEST(TestInvoke) {
@@ -76,13 +64,15 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   micro_op_resolver.AddFullyConnected(tflite::Register_FULLY_CONNECTED_INT8());
 
   tflite::MicroInterpreter interpreter(model, micro_op_resolver, tensor_arena, tensor_arena_size);
-  interpreter.AllocateTensors();
-  TfLiteTensor* input = interpreter.input(0);
-  auto test_data = load_test_data();
   int i = 0;
-  for (auto &datum : test_data)
+  for (const char *name : test_sample_file_paths)
   {
-    std::cout << "Starting inference: " << i << std::endl;
+    if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
+      continue;
+    auto datum = GetTestSample(dataset_path, name);
+    std::cout << "Starting inference: " << i << " (VWW)" << std::endl;
+    interpreter.AllocateTensors();
+    TfLiteTensor* input = interpreter.input(0);
     TFLITE_DCHECK_EQ(input->bytes, static_cast<size_t>(datum.size));
     memcpy(input->data.int8, datum.data, input->bytes);
     TfLiteStatus invoke_status = interpreter.Invoke();

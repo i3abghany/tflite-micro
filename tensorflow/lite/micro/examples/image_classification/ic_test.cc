@@ -45,19 +45,6 @@ TestSample GetTestSample(const char *dataset_path, const char* filename)
     return TestSample{ std::string(filename), (int8_t *) data, size };
 }
 
-std::vector<TestSample> load_test_data()
-{
-  const char *dataset_path = "/local-scratch/localhome/mam47/research/microscale/tflite-micro/tensorflow/lite/micro/examples/image_classification/dataset";
-  std::vector<TestSample> ret;
-  for (const char *name : test_sample_file_paths)
-  {
-    if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
-      continue;
-    ret.push_back(GetTestSample(dataset_path, name));
-  }
-  return ret;
-}
-
 constexpr int tensor_arena_size = 100 * 1024;
 uint8_t tensor_arena[tensor_arena_size];
 const char *dataset_path = "REV_PARSE_PATH_PLACEHOLDER/tflite-micro/tensorflow/lite/micro/examples/image_classification/dataset";

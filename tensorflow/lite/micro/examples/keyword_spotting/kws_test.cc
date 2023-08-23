@@ -44,37 +44,9 @@ TestSample GetTestSample(const char *dataset_path, const char* filename)
     return { filename, (int8_t *) data, size };
 }
 
-std::vector<TestSample> load_test_data()
-{
-  const char *dataset_path = "REV_PARSE_PATH_PLACEHOLDER/tflite-micro/tensorflow/lite/micro/examples/keyword_spotting/dataset";
-  std::vector<TestSample> ret;
-
-#if 0
-  DIR *dir = opendir(dataset_path);
-  struct dirent *ent = readdir(dir);
-  while (ent != NULL)
-  {
-    if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
-    {
-      ent = readdir(dir);
-      continue;
-    }
-    ret.push_back(GetTestSample(dataset_path, ent->d_name));
-    ent = readdir(dir);
-  }
-#else
-  for (const char *name : test_sample_file_paths)
-  {
-    if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
-      continue;
-    ret.push_back(GetTestSample(dataset_path, name));
-  }
-#endif
-  return ret;
-}
-
 constexpr int tensor_arena_size = 200 * 1024;
 uint8_t tensor_arena[tensor_arena_size];
+const char *dataset_path = "REV_PARSE_PATH_PLACEHOLDER/microscale/tflite-micro/tensorflow/lite/micro/examples/keyword_spotting/dataset";
 
 TF_LITE_MICRO_TESTS_BEGIN
 extern int8_t g_kws_ref_model_model_data[];
@@ -100,9 +72,12 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   int correct = 0;
   int i = 0;
 
-  for (auto &datum : test_data)
+  for (const char *name : test_sample_file_paths)
   {
-    std::cout << "Starting inference: " << i << '/' << test_data.size() << std::endl;
+    if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
+      continue;
+    auto datum = GetTestSample(dataset_path, name);
+    std::cout << "Starting inference: " << i << " (KWS)" << std::endl;
     TFLITE_DCHECK_EQ(input->bytes, static_cast<size_t>(datum.size));
     memcpy(input->data.int8, datum.data, input->bytes);
     TfLiteStatus invoke_status = interpreter.Invoke();
@@ -119,7 +94,7 @@ TF_LITE_MICRO_TEST(TestInvoke) {
     i++;
   }
 
-  std::cout << "Testing accuracy: " << ((float) correct / test_data.size()) << std::endl;
+  // std::cout << "Testing accuracy: " << ((float) correct / test_data.size()) << std::endl;
 }
 
 TF_LITE_MICRO_TESTS_END

@@ -54,12 +54,10 @@ TestSample GetTestSample(const char *dataset_path, const char* filename, int idx
 
 constexpr int tensor_arena_size = 200 * 1024;
 uint8_t tensor_arena[tensor_arena_size];
-const char *dataset_path = "/local-scratch/localhome/mam47/research/microscale/tflite-micro/tensorflow/lite/micro/examples/anomaly_detection/dataset";
+const char *dataset_path = "REV_PARSE_PATH_PLACEHOLDER/tflite-micro/tensorflow/lite/micro/examples/anomaly_detection/dataset";
 
 TF_LITE_MICRO_TESTS_BEGIN
 TF_LITE_MICRO_TEST(TestInvoke) {
-  // Map the model into a usable data structure. This doesn't involve any
-  // copying or parsing, it's a very lightweight operation.
   const tflite::Model* model = ::tflite::GetModel(g_model);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     std::cout << "Model provided is schema version not equal to supported version" << std::endl;
@@ -70,16 +68,11 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   micro_op_resolver.AddQuantize();
   micro_op_resolver.AddDequantize();
 
-  // Build an interpreter to run the model with.
   tflite::MicroInterpreter interpreter(model, micro_op_resolver, tensor_arena,
                                        tensor_arena_size);
   interpreter.AllocateTensors();
-
-  // Get information about the memory area to use for the model's input.
   TfLiteTensor* input = interpreter.input(0);
 
-  // Copy an image with a person into the memory area used for the input.
-  // auto test_data = load_test_data();
   float input_scale = input->params.scale;
   int input_zero_point = input->params.zero_point;
   int i = 0;
