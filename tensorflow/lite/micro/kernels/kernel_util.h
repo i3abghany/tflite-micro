@@ -56,6 +56,10 @@ TfLiteEvalTensor* GetMutableEvalInput(const TfLiteContext* context,
 const TfLiteEvalTensor* GetEvalInput(const TfLiteContext* context,
                                      const TfLiteNode* node, int index);
 
+TfLiteRedundancyTensors GetEvalRedundancyTensors(
+    const TfLiteContext* context,
+    const TfLiteNode* node, int index);
+
 // Returns the TfLiteEvalTensor struct for a given output index in a node.
 TfLiteEvalTensor* GetEvalOutput(const TfLiteContext* context,
                                 const TfLiteNode* node, int index);

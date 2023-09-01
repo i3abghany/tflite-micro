@@ -101,6 +101,22 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
   TfLiteEvalTensor* output =
       tflite::micro::GetEvalOutput(context, node, kFullyConnectedOutputTensor);
 
+  auto redundancy = tflite::micro::GetEvalRedundancyTensors(context, node, kFullyConnectedBiasTensor);
+
+  int32_t *d_orig = tflite::micro::GetTensorData<int32_t>(const_cast<TfLiteEvalTensor*>(bias));
+  int32_t *d_r1 = tflite::micro::GetTensorData<int32_t>(redundancy.t1);
+  int32_t *d_r2 = tflite::micro::GetTensorData<int32_t>(redundancy.t2);
+
+  size_t n_params = tflite::micro::GetTensorShape(bias).FlatSize();
+  for (size_t i = 0; i < n_params; i++) {
+    auto& d = d_orig[i], &r1 = d_r1[i], &r2 = d_r2[i];
+    if (d != r1 || r1 != r2 || d != r2) {
+      MicroPrintf("Warning: found an integrity violation: %d, %d, %d", d, r1, r2);
+      auto voted_value = (d & r1) | (r1 & r2) | (d & r2);
+      r1 = voted_value;
+    }
+  }
+
   TFLITE_DCHECK(node->user_data != nullptr);
 
   const auto& data =
