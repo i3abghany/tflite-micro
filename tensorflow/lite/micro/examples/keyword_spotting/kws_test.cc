@@ -49,9 +49,8 @@ uint8_t tensor_arena[tensor_arena_size];
 const char *dataset_path = "REV_PARSE_PATH_PLACEHOLDER/tflite-micro/tensorflow/lite/micro/examples/keyword_spotting/dataset";
 
 TF_LITE_MICRO_TESTS_BEGIN
-extern int8_t g_kws_ref_model_model_data[];
 TF_LITE_MICRO_TEST(TestInvoke) {
-  const tflite::Model* model = ::tflite::GetModel(g_kws_ref_model_model_data);
+  const tflite::Model* model = ::tflite::GetModel(g_kws_data);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     std::cout << "Model provided is schema version not equal to supported version" << std::endl;
   }

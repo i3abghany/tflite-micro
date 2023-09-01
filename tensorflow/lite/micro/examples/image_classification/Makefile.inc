@@ -31,8 +31,8 @@ $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/image_classification/image_prov
 $(image_classification_MODEL_HDRS)
 
 image_classification_GENERATOR_INPUTS := \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/models/ic_model.tflite \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/image_classification/dataset/*.bin \
+$(TENSORFLOW_ROOT)tensorflow/lite/micro/models/ic_model.tflite
+# $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/image_classification/dataset/*.bin
 # image_classification_GENERATOR_INPUTS := $(wildcard $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/image_classification/dataset/*.bin)
 
 image_classification_GENERATED_SRCS := \

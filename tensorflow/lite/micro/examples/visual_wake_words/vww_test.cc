@@ -47,11 +47,11 @@ TestSample GetTestSample(const char *dataset_path, const char* filename)
 
 constexpr int tensor_arena_size = 300 * 1024;
 uint8_t tensor_arena[tensor_arena_size];
-const char *dataset_path = "REV_PARSE_PATH_PLACEHOLDER/tflite-micro/tensorflow/lite/micro/examples/visual_wake_words/dataset";
+const char *dataset_path = "/local-scratch/localhome/mam47/research/microscale/tflite-micro/tensorflow/lite/micro/examples/visual_wake_words/dataset";
 
 TF_LITE_MICRO_TESTS_BEGIN
 TF_LITE_MICRO_TEST(TestInvoke) {
-  const tflite::Model* model = ::tflite::GetModel(g_person_detect_model_data);
+  const tflite::Model* model = ::tflite::GetModel(__vww_96_int8_mod_tflite);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     std::cout << "Model provided is schema version not equal to supported version" << std::endl;
   }

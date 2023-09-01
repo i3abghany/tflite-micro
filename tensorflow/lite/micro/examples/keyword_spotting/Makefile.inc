@@ -35,12 +35,12 @@ $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/keyword_spotting/main_functions
 $(keyword_spotting_MODEL_HDRS)
 
 keyword_spotting_GENERATOR_INPUTS := \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/models/kws_ref_model.tflite \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/keyword_spotting/dataset/tst_000595_On_5.bin \
+# $(TENSORFLOW_ROOT)tensorflow/lite/micro/models/kws_ref_model.tflite \
+# $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/keyword_spotting/dataset/tst_000595_On_5.bin \
 # keyword_spotting_GENERATOR_INPUTS := $(wildcard $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/keyword_spotting/dataset/*.bin)
 
 keyword_spotting_GENERATED_SRCS := \
-$(GENERATED_SRCS_DIR)$(TENSORFLOW_ROOT)tensorflow/lite/micro/models/kws_data.cc
+# $(GENERATED_SRCS_DIR)$(TENSORFLOW_ROOT)tensorflow/lite/micro/models/kws_data.cc
 
 keyword_spotting_GENERATED_HDRS := \
 $(GENERATED_SRCS_DIR)$(TENSORFLOW_ROOT)tensorflow/lite/micro/models/kws_data.h

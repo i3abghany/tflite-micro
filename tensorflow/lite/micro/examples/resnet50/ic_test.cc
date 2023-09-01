@@ -51,7 +51,7 @@ const char *dataset_path = "REV_PARSE_PATH_PLACEHOLDER/microscale/tflite-micro/t
 
 TF_LITE_MICRO_TESTS_BEGIN
 TF_LITE_MICRO_TEST(TestInvoke) {
-  const tflite::Model* model = ::tflite::GetModel(resnet50_model_tflite);
+  const tflite::Model* model = ::tflite::GetModel(resnet50_quant_mod_tflite);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     std::cout << "Model provided is schema version not equal to supported version" << std::endl;
   }
@@ -66,8 +66,6 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   micro_op_resolver.AddMaxPool2D();
   micro_op_resolver.AddPad();
 
-  tflite::MicroInterpreter interpreter(model, micro_op_resolver, tensor_arena,
-                                       tensor_arena_size);
   int i = 0;
   for (const char *name : test_sample_file_paths)
   {
@@ -76,6 +74,8 @@ TF_LITE_MICRO_TEST(TestInvoke) {
     auto datum = GetTestSample(dataset_path, name);
     std::cout << "Starting inference: " << i << " (IC)" << std::endl;
     i++;
+    tflite::MicroInterpreter interpreter(model, micro_op_resolver, tensor_arena,
+                                        tensor_arena_size);
     interpreter.AllocateTensors();
     TfLiteTensor* input = interpreter.input(0);
     TFLITE_DCHECK_EQ(input->bytes, static_cast<size_t>(datum.size));

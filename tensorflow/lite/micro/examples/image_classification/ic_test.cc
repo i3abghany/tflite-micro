@@ -51,7 +51,8 @@ const char *dataset_path = "/local-scratch/localhome/mam47/research/microscale/t
 
 TF_LITE_MICRO_TESTS_BEGIN
 TF_LITE_MICRO_TEST(TestInvoke) {
-  const tflite::Model* model = ::tflite::GetModel(pretrainedResnet_quant_tflite);
+  // const tflite::Model* model = ::tflite::GetModel(pretrainedResnet_quant_tflite);
+  const tflite::Model* model = ::tflite::GetModel(mod_pretrainedRes_quant_tflite);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     std::cout << "Model provided is schema version not equal to supported version" << std::endl;
   }
@@ -64,13 +65,14 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   micro_op_resolver.AddReshape();
   micro_op_resolver.AddSoftmax(tflite::Register_SOFTMAX_INT8());
 
-  tflite::MicroInterpreter interpreter(model, micro_op_resolver, tensor_arena, tensor_arena_size);
-  interpreter.AllocateTensors();
   int i = 0;
   for (const char *name : test_sample_file_paths)
   {
     if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
       continue;
+
+    tflite::MicroInterpreter interpreter(model, micro_op_resolver, tensor_arena, tensor_arena_size);
+    interpreter.AllocateTensors();
     auto datum = GetTestSample(dataset_path, name);
     std::cout << "Starting inference: " << i << " (IC)" << std::endl;
     i++;

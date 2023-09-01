@@ -22,8 +22,8 @@ $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/visual_wake_words/detection_res
 $(visual_wake_words_MODEL_HDRS)
 
 visual_wake_words_GENERATOR_INPUTS := \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/models/vww_model.tflite \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/visual_wake_words/dataset/*.bin \
+# $(TENSORFLOW_ROOT)tensorflow/lite/micro/models/vww_model.tflite \
+# $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/visual_wake_words/dataset/*.bin \
 # visual_wake_words_GENERATOR_INPUTS := $(wildcard $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/visual_wake_words/dataset/*.bin)
 
 visual_wake_words_GENERATED_SRCS := \
