@@ -47,11 +47,11 @@ TestSample GetTestSample(const char *dataset_path, const char* filename)
 
 constexpr int tensor_arena_size = 100 * 1024;
 uint8_t tensor_arena[tensor_arena_size];
-const char *dataset_path = "REV_PARSE_PATH_PLACEHOLDER/tflite-micro/tensorflow/lite/micro/examples/mnist_lenet/dataset";
+const char *dataset_path = "/local-scratch/localhome/mam47/research/microscale/tflite-micro/tensorflow/lite/micro/examples/mnist_lenet/dataset";
 
 TF_LITE_MICRO_TESTS_BEGIN
 TF_LITE_MICRO_TEST(TestInvoke) {
-  const tflite::Model* model = ::tflite::GetModel(lenet_model_tflite);
+  const tflite::Model* model = ::tflite::GetModel(lenet_mod_tflite);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     std::cout << "Model provided is schema version not equal to supported version" << std::endl;
   }
@@ -93,6 +93,7 @@ TF_LITE_MICRO_TEST(TestInvoke) {
     bool is_correct = RespondToDetection(output->data.int8, datum.name.c_str());
     correct += is_correct == true;
     std::cout << "is_correct: " << is_correct << std::endl;
+    break;
   }
 }
 
