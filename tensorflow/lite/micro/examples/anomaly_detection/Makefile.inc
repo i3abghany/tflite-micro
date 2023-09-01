@@ -22,8 +22,8 @@ $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/anomaly_detection/detection_res
 $(anomaly_detection_MODEL_HDRS)
 
 anomaly_detection_GENERATOR_INPUTS := \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/models/ad_model.tflite \
-$(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/anomaly_detection/dataset/*.bin \
+$(TENSORFLOW_ROOT)tensorflow/lite/micro/models/ad_model.tflite
+# $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/anomaly_detection/dataset/*.bin \
 # anomaly_detection_GENERATOR_INPUTS := $(wildcard $(TENSORFLOW_ROOT)tensorflow/lite/micro/examples/anomaly_detection/dataset/*.bin)
 
 anomaly_detection_GENERATED_SRCS := \
