@@ -117,6 +117,15 @@ TfLiteEvalTensor* MicroContext::GetEvalTensor(int tensor_idx) {
               .tensors[tensor_idx];
 }
 
+TfLiteRedundancyTensors MicroContext::GetEvalRedundancyTensors(int tensor_idx) {
+  TfLiteRedundancyTensors ret {
+    &graph_.GetAllocations()[graph_.GetCurrentSubgraphIndex()].redundancy1[tensor_idx],
+    &graph_.GetAllocations()[graph_.GetCurrentSubgraphIndex()].redundancy2[tensor_idx]
+  };
+
+  return ret;
+}
+
 void MicroContext::SetScratchBufferHandles(
     ScratchBufferHandle* scratch_buffer_handles) {
   scratch_buffer_handles_ = scratch_buffer_handles;

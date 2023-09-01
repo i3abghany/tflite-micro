@@ -626,6 +626,10 @@ typedef struct TfLiteEvalTensor {
   TfLiteType type;
 } TfLiteEvalTensor;
 
+typedef struct TfLiteRedundancyTensors {
+  TfLiteEvalTensor *t1, *t2;
+} TfLiteRedundancyTensors;
+
 #ifndef TF_LITE_STATIC_MEMORY
 // Free data memory of tensor `t`.
 void TfLiteTensorDataFree(TfLiteTensor* t);
@@ -879,6 +883,10 @@ typedef struct TfLiteContext {
   // WARNING: This method may not be available on all platforms.
   TfLiteEvalTensor* (*GetEvalTensor)(const struct TfLiteContext* context,
                                      int tensor_idx);
+
+  TfLiteRedundancyTensors (*GetEvalRedundancyTensors)(
+      const struct TfLiteContext* context,
+      int tensor_idx);
 
   // Retrieves named metadata buffer from the TFLite model.
   // Returns kTfLiteOk if metadata is successfully obtained from the flatbuffer

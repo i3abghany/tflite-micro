@@ -109,6 +109,7 @@ class MicroContext {
   // Returns a TfLiteEvalTensor struct for a given index.
   // Virtual so that it can be faked for kernel tests.
   virtual TfLiteEvalTensor* GetEvalTensor(int tensor_idx);
+  virtual TfLiteRedundancyTensors GetEvalRedundancyTensors(int tensor_idx);
 
   // Sets the State of MemoryPlanning MicroContext
   void SetInterpreterState(MicroContext::InterpreterState state);
@@ -174,6 +175,10 @@ inline TfLiteTensor* MicroContextGetTensor(const struct TfLiteContext* context,
 inline TfLiteEvalTensor* MicroContextGetEvalTensor(
     const struct TfLiteContext* context, int tensor_idx) {
   return GetMicroContext(context)->GetEvalTensor(tensor_idx);
+}
+inline TfLiteRedundancyTensors MicroContextGetEvalRedundancyTensors(
+    const struct TfLiteContext* context, int tensor_idx) {
+  return GetMicroContext(context)->GetEvalRedundancyTensors(tensor_idx);
 }
 inline TfLiteExternalContext* MicroContextGetExternalContext(
     TfLiteContext* context, TfLiteExternalContextType unused) {

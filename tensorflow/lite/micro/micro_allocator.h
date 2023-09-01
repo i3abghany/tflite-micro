@@ -84,6 +84,8 @@ struct ScratchBufferHandle {
 struct SubgraphAllocations {
   NodeAndRegistration* node_and_registrations;
   TfLiteEvalTensor* tensors;
+  TfLiteEvalTensor* redundancy1;
+  TfLiteEvalTensor* redundancy2;
 };
 
 // Allocator responsible for allocating memory for all intermediate tensors

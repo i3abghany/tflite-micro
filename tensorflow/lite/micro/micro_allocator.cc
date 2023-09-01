@@ -737,9 +737,25 @@ TfLiteStatus MicroAllocator::AllocateTfLiteEvalTensors(
     TfLiteEvalTensor* tensors = reinterpret_cast<TfLiteEvalTensor*>(
         persistent_buffer_allocator_->AllocatePersistentBuffer(
             sizeof(TfLiteEvalTensor) * alloc_count, alignof(TfLiteEvalTensor)));
+
     if (tensors == nullptr) {
       MicroPrintf(
           "Failed to allocate memory for context->eval_tensors, "
+          "%d bytes required",
+          sizeof(TfLiteEvalTensor) * alloc_count);
+      return kTfLiteError;
+    }
+
+    TfLiteEvalTensor* redundancy1 = reinterpret_cast<TfLiteEvalTensor*>(
+        persistent_buffer_allocator_->AllocatePersistentBuffer(
+            sizeof(TfLiteEvalTensor) * alloc_count, alignof(TfLiteEvalTensor)));
+    TfLiteEvalTensor* redundancy2 = reinterpret_cast<TfLiteEvalTensor*>(
+        persistent_buffer_allocator_->AllocatePersistentBuffer(
+            sizeof(TfLiteEvalTensor) * alloc_count, alignof(TfLiteEvalTensor)));
+
+    if (redundancy1 == nullptr || redundancy2 == nullptr) {
+      MicroPrintf(
+          "Failed to allocate memory for context->redundancy, "
           "%d bytes required",
           sizeof(TfLiteEvalTensor) * alloc_count);
       return kTfLiteError;
@@ -752,8 +768,25 @@ TfLiteStatus MicroAllocator::AllocateTfLiteEvalTensors(
         MicroPrintf("Failed to initialize tensor %d", i);
         return kTfLiteError;
       }
+
+      if (subgraph->tensors()->Get(i)->type() == tflite::TensorType_INT32) {
+        status = internal::InitializeTfLiteEvalTensorFromFlatbuffer(
+            *subgraph->tensors()->Get(i), model->redundancy()->first_copy(), &redundancy1[i]);
+        if (status != kTfLiteOk) {
+          MicroPrintf("Failed to initialize redundancy tensor %d", i);
+          return kTfLiteError;
+        }
+        status = internal::InitializeTfLiteEvalTensorFromFlatbuffer(
+            *subgraph->tensors()->Get(i), model->redundancy()->second_copy(), &redundancy2[i]);
+        if (status != kTfLiteOk) {
+          MicroPrintf("Failed to initialize redundancy tensor %d", i);
+          return kTfLiteError;
+        }
+      }
     }
     subgraph_allocations[subgraph_idx].tensors = tensors;
+    subgraph_allocations[subgraph_idx].redundancy1 = redundancy1;
+    subgraph_allocations[subgraph_idx].redundancy2 = redundancy2;
   }
   return kTfLiteOk;
 }

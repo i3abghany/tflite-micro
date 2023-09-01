@@ -82,6 +82,7 @@ void MicroInterpreter::Init(MicroProfilerInterface* profiler) {
   context_.ReportError = MicroContextReportOpError;
   context_.GetTensor = MicroContextGetTensor;
   context_.GetEvalTensor = MicroContextGetEvalTensor;
+  context_.GetEvalRedundancyTensors = MicroContextGetEvalRedundancyTensors;
   context_.profiler = profiler;
   context_.RequestScratchBufferInArena =
       MicroContextRequestScratchBufferInArena;
