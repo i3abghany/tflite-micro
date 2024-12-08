@@ -51,7 +51,7 @@ const char *dataset_path = "REV_PARSE_PATH_PLACEHOLDER/tflite-micro/tensorflow/l
 
 TF_LITE_MICRO_TESTS_BEGIN
 TF_LITE_MICRO_TEST(TestInvoke) {
-  const tflite::Model* model = ::tflite::GetModel(resnet50_quant_mod_tflite);
+  const tflite::Model* model = ::tflite::GetModel(resnet50_model_new_tflite);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     std::cout << "Model provided is schema version not equal to supported version" << std::endl;
   }

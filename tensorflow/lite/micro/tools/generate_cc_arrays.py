@@ -26,6 +26,20 @@ import numpy as np
 
 from PIL import Image
 
+import pip
+
+def install(package):
+    if hasattr(pip, 'main'):
+        pip.main(['install', package])
+    else:
+        pip._internal.main(['install', package])
+
+try:
+  from PIL import Image
+except ImportError:
+  install('Pillow')
+  from PIL import Image
+
 
 def generate_file(out_fname, array_name, array_type, array_contents, size):
   """Write an array of values to a CC or header file."""
