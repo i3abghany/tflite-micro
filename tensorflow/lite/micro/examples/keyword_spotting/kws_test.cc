@@ -15,7 +15,6 @@ limitations under the License.
 
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/micro/examples/keyword_spotting/kws_model_settings.h"
-#include "tensorflow/lite/micro/examples/keyword_spotting/dataset/tst_000595_On_5_test_data.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_log.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
