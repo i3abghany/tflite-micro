@@ -47,7 +47,7 @@ TestSample GetTestSample(const char *dataset_path, const char* filename)
 
 constexpr int tensor_arena_size = 100 * 1024;
 uint8_t tensor_arena[tensor_arena_size];
-const char *dataset_path = "/local-scratch/localhome/mam47/research/microscale/tflite-micro/tensorflow/lite/micro/examples/image_classification/dataset";
+const char *dataset_path = "REV_PARSE_PATH_PLACEHOLDER/tflite-micro/tensorflow/lite/micro/examples/image_classification/dataset";
 
 TF_LITE_MICRO_TESTS_BEGIN
 TF_LITE_MICRO_TEST(TestInvoke) {
