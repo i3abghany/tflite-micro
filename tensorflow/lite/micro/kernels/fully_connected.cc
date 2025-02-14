@@ -22,6 +22,7 @@ limitations under the License.
 #include "tensorflow/lite/kernels/internal/reference/integer_ops/fully_connected.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
 #include "tensorflow/lite/micro/micro_log.h"
+#include "xxhash.h"
 
 namespace tflite {
 namespace {
@@ -31,6 +32,22 @@ void* Init(TfLiteContext* context, const char* buffer, size_t length) {
   return context->AllocatePersistentBuffer(context,
                                            sizeof(OpDataFullyConnected));
 }
+
+// uint32_t GetBiasHash(int32_t* bias_data, size_t n_params) {
+//   return XXH32(bias_data, n_params * sizeof(int32_t), 0x1337);
+// }
+// 
+// TfLiteStatus PopulateHashesForBias(TfLiteContext* context, TfLiteNode* node, size_t n_params) {
+//   if (node->bias_hash != 0xFFFFFFFF)
+//     return kTfLiteOk;
+// 
+//   auto redundancy = tflite::micro::GetEvalRedundancyTensors(context, node, kFullyConnectedBiasTensor);
+//   int32_t *d_r2 = tflite::micro::GetTensorData<int32_t>(redundancy.t2);
+// 
+//   node->bias_hash = GetBiasHash(d_r2, n_params);
+// 
+//   return kTfLiteOk;
+// }
 
 TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
   MicroContext* micro_context = GetMicroContext(context);
@@ -101,21 +118,34 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
   TfLiteEvalTensor* output =
       tflite::micro::GetEvalOutput(context, node, kFullyConnectedOutputTensor);
 
-  auto redundancy = tflite::micro::GetEvalRedundancyTensors(context, node, kFullyConnectedBiasTensor);
+//   int32_t *d_orig = tflite::micro::GetTensorData<int32_t>(const_cast<TfLiteEvalTensor*>(bias));
+//   size_t n_params = tflite::micro::GetTensorShape(bias).FlatSize();
+//   PopulateHashesForBias(context, node, n_params);
+//   uint32_t calculated_hash = GetBiasHash(d_orig, n_params);
+// 
+//   if (node->bias_hash != calculated_hash) {
+//     auto redundancy = tflite::micro::GetEvalRedundancyTensors(context, node, kFullyConnectedBiasTensor);
+//     int32_t *d_r1 = tflite::micro::GetTensorData<int32_t>(redundancy.t1);
+//     MicroPrintf("Warning: found an integrity violation: %d, %d", node->bias_hash, calculated_hash);
+//     for (size_t i = 0; i < n_params; i++)
+//       d_orig[i] = d_r1[i];
+//   }
 
-  int32_t *d_orig = tflite::micro::GetTensorData<int32_t>(const_cast<TfLiteEvalTensor*>(bias));
-  int32_t *d_r1 = tflite::micro::GetTensorData<int32_t>(redundancy.t1);
-  int32_t *d_r2 = tflite::micro::GetTensorData<int32_t>(redundancy.t2);
+  // auto redundancy = tflite::micro::GetEvalRedundancyTensors(context, node, kFullyConnectedBiasTensor);
 
-  size_t n_params = tflite::micro::GetTensorShape(bias).FlatSize();
-  for (size_t i = 0; i < n_params; i++) {
-    auto& d = d_orig[i], &r1 = d_r1[i], &r2 = d_r2[i];
-    if (d != r1 || r1 != r2 || d != r2) {
-      MicroPrintf("Warning: found an integrity violation: %d, %d, %d", d, r1, r2);
-      auto voted_value = (d & r1) | (r1 & r2) | (d & r2);
-      r1 = voted_value;
-    }
-  }
+  // int32_t *d_orig = tflite::micro::GetTensorData<int32_t>(const_cast<TfLiteEvalTensor*>(bias));
+  // int32_t *d_r1 = tflite::micro::GetTensorData<int32_t>(redundancy.t1);
+  // int32_t *d_r2 = tflite::micro::GetTensorData<int32_t>(redundancy.t2);
+
+  // size_t n_params = tflite::micro::GetTensorShape(bias).FlatSize();
+  // for (size_t i = 0; i < n_params; i++) {
+  //   auto& d = d_orig[i], &r1 = d_r1[i], &r2 = d_r2[i];
+  //   if (d != r1 || r1 != r2 || d != r2) {
+  //     MicroPrintf("Warning: found an integrity violation: %d, %d, %d", d, r1, r2);
+  //     auto voted_value = (d & r1) | (r1 & r2) | (d & r2);
+  //     r1 = voted_value;
+  //   }
+  // }
 
   TFLITE_DCHECK(node->user_data != nullptr);
 

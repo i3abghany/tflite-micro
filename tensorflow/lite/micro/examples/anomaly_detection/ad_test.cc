@@ -26,6 +26,7 @@ limitations under the License.
 #include "tensorflow/lite/micro/examples/anomaly_detection/dataset.h"
 #include <iostream>
 #include <fstream>
+#include <chrono>
 
 struct TestSample
 {
@@ -76,13 +77,14 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   float input_scale = input->params.scale;
   int input_zero_point = input->params.zero_point;
   int i = 0;
+  auto t1 = std::chrono::high_resolution_clock::now();
   for (const char *name : test_sample_file_paths)
   {
     if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
       continue;
     for (int j = 0; j < 40; j++) {
       auto datum = GetTestSample(dataset_path, name, j);
-      std::cout << "Starting inference: " << i << " (AD)" << std::endl;
+      // std::cout << "Starting inference: " << i << " (AD)" << std::endl;
       i++;
       int8_t *quant_input = new int8_t[datum.size];
       for (size_t k = 0; k < datum.size; k++) {
@@ -108,6 +110,9 @@ TF_LITE_MICRO_TEST(TestInvoke) {
       std::cout << "diffsum: " << diffsum << std::endl;
     }
   }
+  auto t2 = std::chrono::high_resolution_clock::now();
+  auto sz = sizeof(test_sample_file_paths) / sizeof(test_sample_file_paths[0]);
+  std::cout << "Time in ms: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() / sz << std::endl;
 }
 
 TF_LITE_MICRO_TESTS_END

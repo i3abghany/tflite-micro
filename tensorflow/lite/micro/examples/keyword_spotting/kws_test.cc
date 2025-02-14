@@ -25,6 +25,7 @@ limitations under the License.
 #include "tensorflow/lite/micro/examples/keyword_spotting/dataset.h"
 #include <iostream>
 #include <fstream>
+#include <chrono>
 
 struct TestSample
 {
@@ -68,13 +69,13 @@ TF_LITE_MICRO_TEST(TestInvoke) {
 
   int correct = 0;
   int i = 0;
-
+  auto tp = std::chrono::high_resolution_clock::now();
   for (const char *name : test_sample_file_paths)
   {
     if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
       continue;
     auto datum = GetTestSample(dataset_path, name);
-    std::cout << "Starting inference: " << i << " (KWS)" << std::endl;
+    // std::cout << "Starting inference: " << i << " (KWS)" << std::endl;
     TFLITE_DCHECK_EQ(input->bytes, static_cast<size_t>(datum.size));
     memcpy(input->data.int8, datum.data, input->bytes);
     TfLiteStatus invoke_status = interpreter.Invoke();
@@ -90,6 +91,9 @@ TF_LITE_MICRO_TEST(TestInvoke) {
     std::cout << "predicted correctly: " << (is_correct ? "true" : "false") << std::endl;
     i++;
   }
+  auto t2 = std::chrono::high_resolution_clock::now();
+  auto sz = sizeof(test_sample_file_paths) / sizeof(test_sample_file_paths[0]);
+  std::cout << "time in ms: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - tp).count() / sz << std::endl;
 }
 
 TF_LITE_MICRO_TESTS_END

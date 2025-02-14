@@ -25,6 +25,7 @@ limitations under the License.
 #include "tensorflow/lite/micro/examples/image_classification/dataset.h"
 #include <iostream>
 #include <fstream>
+#include <chrono>
 
 struct TestSample
 {
@@ -66,6 +67,7 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   micro_op_resolver.AddSoftmax(tflite::Register_SOFTMAX_INT8());
 
   int i = 0;
+  auto t1 = std::chrono::high_resolution_clock::now();
   for (const char *name : test_sample_file_paths)
   {
     if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
@@ -74,7 +76,7 @@ TF_LITE_MICRO_TEST(TestInvoke) {
     tflite::MicroInterpreter interpreter(model, micro_op_resolver, tensor_arena, tensor_arena_size);
     interpreter.AllocateTensors();
     auto datum = GetTestSample(dataset_path, name);
-    std::cout << "Starting inference: " << i << " (IC)" << std::endl;
+    // std::cout << "Starting inference: " << i << " (IC)" << std::endl;
     i++;
     TfLiteTensor* input = interpreter.input(0);
     TFLITE_DCHECK_EQ(input->bytes, static_cast<size_t>(datum.size));
@@ -92,6 +94,9 @@ TF_LITE_MICRO_TEST(TestInvoke) {
     bool is_correct = RespondToDetection(output->data.int8, datum.name.c_str());
     std::cout << "is_correct: " << is_correct << std::endl;
   }
+  auto t2 = std::chrono::high_resolution_clock::now();
+  auto sz = sizeof(test_sample_file_paths) / sizeof(test_sample_file_paths[0]);
+  std::cout << "Time taken: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() / sz << std::endl;
 }
 
 TF_LITE_MICRO_TESTS_END

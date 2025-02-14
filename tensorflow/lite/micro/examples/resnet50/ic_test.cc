@@ -25,6 +25,7 @@ limitations under the License.
 #include "tensorflow/lite/micro/examples/image_classification/dataset.h"
 #include <iostream>
 #include <fstream>
+#include <chrono>
 #include <cstdlib>
 
 struct TestSample
@@ -67,12 +68,13 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   micro_op_resolver.AddPad();
 
   int i = 0;
+  auto t1 = std::chrono::high_resolution_clock::now();
   for (const char *name : test_sample_file_paths)
   {
     if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
       continue;
     auto datum = GetTestSample(dataset_path, name);
-    std::cout << "Starting inference: " << i << " (IC)" << std::endl;
+    // std::cout << "Starting inference: " << i << " (IC)" << std::endl;
     i++;
     tflite::MicroInterpreter interpreter(model, micro_op_resolver, tensor_arena,
                                         tensor_arena_size);
@@ -95,6 +97,9 @@ TF_LITE_MICRO_TEST(TestInvoke) {
     interpreter.Reset();
     delete[] datum.data;
   }
+  auto t2 = std::chrono::high_resolution_clock::now();
+  auto sz = sizeof(test_sample_file_paths) / sizeof(test_sample_file_paths[0]);
+  std::cout << "Time taken: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() / sz << "ms" << std::endl;
 }
 
 TF_LITE_MICRO_TESTS_END

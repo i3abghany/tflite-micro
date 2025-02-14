@@ -97,7 +97,7 @@ endif
 
 TEST_SCRIPT :=
 
-MICROLITE_LIBS := -lm
+MICROLITE_LIBS := -lm -lxxhash
 
 # For the optimized_kernel_dir, and co-processor as specified on the
 # command line we add -D<tag> to the cflags to allow for #idefs in the code.

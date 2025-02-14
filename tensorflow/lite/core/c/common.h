@@ -521,6 +521,7 @@ typedef struct TfLiteNode {
 
   // Whether this op might have side effect (e.g. stateful op).
   bool might_have_side_effect;
+  uint32_t bias_hash;
 } TfLiteNode;
 #else   // defined(TF_LITE_STATIC_MEMORY)?
 // NOTE: This flag is opt-in only at compile time.
@@ -605,6 +606,7 @@ typedef struct TfLiteNode {
   // WARNING: This is an experimental interface that is subject to change.
   const void* custom_initial_data;
   int custom_initial_data_size;
+  uint32_t bias_hash;
 } TfLiteNode;
 #endif  // TF_LITE_STATIC_MEMORY
 

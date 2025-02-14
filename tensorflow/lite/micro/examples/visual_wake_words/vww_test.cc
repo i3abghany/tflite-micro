@@ -25,6 +25,7 @@ limitations under the License.
 #include "tensorflow/lite/micro/examples/visual_wake_words/dataset.h"
 #include <iostream>
 #include <fstream>
+#include <chrono>
 
 struct TestSample
 {
@@ -66,12 +67,13 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   tflite::MicroInterpreter interpreter(model, micro_op_resolver, tensor_arena, tensor_arena_size);
   interpreter.AllocateTensors();
   int i = 0;
+  auto t1 = std::chrono::high_resolution_clock::now();
   for (const char *name : test_sample_file_paths)
   {
     if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
       continue;
     auto datum = GetTestSample(dataset_path, name);
-    std::cout << "Starting inference: " << i << " (VWW)" << std::endl;
+    // std::cout << "Starting inference: " << i << " (VWW)" << std::endl;
     TfLiteTensor* input = interpreter.input(0);
     TFLITE_DCHECK_EQ(input->bytes, static_cast<size_t>(datum.size));
     memcpy(input->data.int8, datum.data, input->bytes);
@@ -92,6 +94,9 @@ TF_LITE_MICRO_TEST(TestInvoke) {
     std::cout << "is_correct: " << is_correct << std::endl;
     i++;
   }
+  auto t2 = std::chrono::high_resolution_clock::now();
+  auto sz = sizeof(test_sample_file_paths) / sizeof(test_sample_file_paths[0]);
+  std::cout << "Time taken: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() / sz << std::endl;
 }
 
 TF_LITE_MICRO_TESTS_END

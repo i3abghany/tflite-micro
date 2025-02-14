@@ -25,6 +25,7 @@ limitations under the License.
 #include "tensorflow/lite/micro/examples/mnist_lenet/dataset.h"
 #include <iostream>
 #include <fstream>
+#include <chrono>
 
 struct TestSample
 {
@@ -71,6 +72,7 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   TF_LITE_MICRO_EXPECT(input != nullptr);
   int i = 0;
   int correct = 0;
+  auto t1 = std::chrono::high_resolution_clock::now();
   for (const char *name : test_sample_file_paths)
   {
     if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
@@ -93,8 +95,10 @@ TF_LITE_MICRO_TEST(TestInvoke) {
     bool is_correct = RespondToDetection(output->data.int8, datum.name.c_str());
     correct += is_correct == true;
     std::cout << "is_correct: " << is_correct << std::endl;
-    break;
   }
+  auto t2 = std::chrono::high_resolution_clock::now();
+  auto sz = sizeof(test_sample_file_paths) / sizeof(test_sample_file_paths[0]);
+  std::cout << "Time in milliseconds: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() / sz << std::endl;
 }
 
 TF_LITE_MICRO_TESTS_END

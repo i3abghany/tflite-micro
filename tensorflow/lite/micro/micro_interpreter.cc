@@ -176,6 +176,7 @@ TfLiteStatus MicroInterpreter::PrepareNodeAndRegistrationDataFromFlatbuffer() {
       node->builtin_data = reinterpret_cast<void*>(builtin_data);
       node->custom_initial_data = custom_data;
       node->custom_initial_data_size = custom_data_size;
+      node->bias_hash = 0xFFFFFFFF;
 
       if (op->intermediates() && (op->intermediates()->size() > 0)) {
         node->intermediates =
